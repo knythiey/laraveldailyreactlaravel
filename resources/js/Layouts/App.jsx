@@ -1,9 +1,16 @@
 import React from 'react'
-import { BrowserRouter, Route, Routes, Link } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, NavLink } from 'react-router-dom'
 import PostsIndex from '../Pages/Posts/Index'
 import PostsCreate from '../Pages/Posts/Create'
 
 const App = () => {
+  const isNavLinkActive = (isActive) => {
+    return (
+      isActive ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
+        : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out'
+    )
+  }
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-100">
@@ -18,14 +25,14 @@ const App = () => {
                 </div>
 
                 <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                  <Link to="/"
-                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                  <NavLink to="/"
+                    className={({ isActive }) => isNavLinkActive(isActive)}>
                     Posts
-                  </Link>
-                  <Link to="/posts/create"
-                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
+                  </NavLink>
+                  <NavLink to="/posts/create"
+                    className={({ isActive }) => isNavLinkActive(isActive)}>
                     Add post
-                  </Link>
+                  </NavLink>
                 </div>
               </div>
             </div>

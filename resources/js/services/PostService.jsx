@@ -1,8 +1,21 @@
-import { post, get } from './ApiService';
+import { post, get } from './';
 
 export const getPosts = async (payload) => {
     try {
         const response = await get('api/posts', payload);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const storePost = async (params) => {
+    try {
+        const payload = {
+            ...params,
+        };
+
+        const response = await post(`api/posts`, payload);
         return response;
     } catch (error) {
         throw error;

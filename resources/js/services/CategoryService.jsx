@@ -1,4 +1,4 @@
-import { post, get } from './ApiService';
+import { post, get } from './';
 
 export const getCategories = async (payload) => {
     try {

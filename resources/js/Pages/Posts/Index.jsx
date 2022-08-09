@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getPosts } from '../../services/PostService';
-import { getCategories } from '../../services/CategoryService';
+import { getPosts, getCategories } from '../../Services';
 
 const PostsIndex = () => {
     const isMounted = useRef(true);

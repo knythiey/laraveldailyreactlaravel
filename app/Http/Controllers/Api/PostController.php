@@ -22,16 +22,16 @@ class PostController extends Controller
         // security
         if (!in_array($orderCol, ['id', 'title']))
             $orderCol = 'id';
-        
+
         if (!in_array($orderDir, ['asc', 'desc']))
             $orderDir = 'desc';
 
         $posts = Post::with('category')
-        ->when($request->filled('category_id'), function($query) use ($request) {
-            $query->where('category_id', intval($request->category_id));
-        })
-        ->orderBy($orderCol, $orderDir)
-        ->paginate(10);
+            ->when($request->filled('category_id'), function ($query) use ($request) {
+                $query->where('category_id', intval($request->category_id));
+            })
+            ->orderBy($orderCol, $orderDir)
+            ->paginate(10);
         return PostResource::Collection($posts);
     }
 
@@ -43,7 +43,13 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $post = Post::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'category_id' => $request->category_id
+        ]);
+
+        return new PostResource($post);
     }
 
     /**
