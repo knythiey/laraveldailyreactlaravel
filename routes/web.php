@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::view('/', 'dashboard')->name('dashboard');
+Route::view('/', 'layouts.app');
 
-require __DIR__.'/auth.php';
+// FIX for SPA external URL should now still work
+Route::view('/{any?}', 'layouts.app')->where('any', '.*');

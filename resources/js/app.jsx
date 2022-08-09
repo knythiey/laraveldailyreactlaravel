@@ -1,6 +1,6 @@
 import './bootstrap';
 
 import ReactDOM from 'react-dom/client';
-import PostsIndex from '../Pages/Posts/Index';
+import App from './Layouts/App';
 
-ReactDOM.createRoot(document.getElementById('app')).render(<PostsIndex />);
+ReactDOM.createRoot(document.getElementById('app')).render(<App />);
