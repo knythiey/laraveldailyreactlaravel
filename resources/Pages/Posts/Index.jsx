@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getPosts } from '../../services/PostService';
+import { getCategories } from '../../services/CategoryService';
 
 const PostsIndex = () => {
     const isMounted = useRef(true);
     const [posts, setPosts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [query, setQuery] = useState({ page: 1, category_id: '' });
 
     useEffect(() => {
         fetchPosts();
+        fetchCategories();
+        console.log(posts);
     }, []);
 
     useEffect(() => {
@@ -15,12 +20,28 @@ const PostsIndex = () => {
         };
     }, []);
 
-    const fetchPosts = useCallback(async (page = 1) => {
+    useEffect(() => {
+        fetchPosts();
+    }, [query])
+
+    const fetchPosts = useCallback(async () => {
         try {
             if (!isMounted.current) return;
-            let res = await getPosts(page);
+            let res = await getPosts(query);
             if (res.data) {
                 setPosts(res.data);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
+    const fetchCategories = useCallback(async () => {
+        try {
+            if (!isMounted.current) return;
+            let res = await getCategories();
+            if (res.data.data) {
+                setCategories(res.data.data);
             }
         } catch (err) {
             console.log(err);
@@ -29,11 +50,20 @@ const PostsIndex = () => {
 
     const pageChanged = useCallback((url) => {
         if (!url) return;
-        const fullUrl = new URL(url),
-            page = fullUrl.searchParams.get('page')
+        const fullUrl = new URL(url);
+        setQuery((prev) => ({
+            ...prev, page: fullUrl.searchParams.get('page')
+        }));
+    }, []);
 
-        fetchPosts(page)
-    }, [posts]);
+    const categoryChanged = useCallback((event) => {
+        if (!event) return;
+
+        setQuery({
+            page: 1,
+            category_id: event.target.value
+        });
+    }, []);
 
     const renderPosts = useCallback(() => {
         return (
@@ -43,6 +73,7 @@ const PostsIndex = () => {
                         <tr key={`post-${post.id}`}>
                             <td>{post.id}</td>
                             <td>{post.title}</td>
+                            <td>{post.category.name}</td>
                             <td>{post.content}</td>
                             <td>{post.created_at}</td>
                         </tr>
@@ -53,7 +84,6 @@ const PostsIndex = () => {
     }, [posts])
 
     const renderPaginatorLinks = useCallback(() => {
-        console.log(posts);
         return posts.meta.links.map((link, index) =>
             <button
                 key={index}
@@ -95,10 +125,29 @@ const PostsIndex = () => {
             );
     }, [posts]);
 
+    const renderCategoryFilter = useCallback(() => {
+        if (!categories) return;
+
+        const catEle = categories.map(cat =>
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+        );
+
+        return (
+            <select onChange={categoryChanged} className="mt-1 sm:mt-0 sm:w-1/4 rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                <option value=''>-- all categories --</option>
+                {catEle}
+            </select>
+        );
+    }, [categories]);
+
     // if (!posts.data) return;
     return (
         <div className="overflow-hidden overflow-x-auto p-6 bg-white border-gray-200">
             <div className="min-w-full align-middle">
+                <div className="mb-4">
+                    {renderCategoryFilter()}
+                </div>
+
                 <table className="table">
                     <thead className="table-header">
                         <tr>
@@ -107,6 +156,9 @@ const PostsIndex = () => {
                             </th>
                             <th>
                                 <span>Title</span>
+                            </th>
+                            <th>
+                                <span>Category</span>
                             </th>
                             <th>
                                 <span>Content</span>

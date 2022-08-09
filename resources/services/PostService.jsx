@@ -1,10 +1,7 @@
 import { post, get } from './ApiService';
 
-export const getPosts = async (page = 1) => {
+export const getPosts = async (payload) => {
     try {
-        let payload = {
-            page: page,
-        };
         const response = await get('api/posts', payload);
         return response;
     } catch (error) {

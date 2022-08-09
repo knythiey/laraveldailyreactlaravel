@@ -2,26 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Post;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PostResource;
+use App\Http\Resources\CategoryResource;
+use App\Models\Category;
+use Illuminate\Http\Request;
 
-class PostController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
-        $posts = Post::with('category')
-        ->when($request->filled('category_id'), function($query) use ($request) {
-            $query->where('category_id', intval($request->category_id));
-        })
-        ->paginate(10);
-        return PostResource::Collection($posts);
+        return CategoryResource::collection(Category::all());
     }
 
     /**
