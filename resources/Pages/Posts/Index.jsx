@@ -6,12 +6,16 @@ const PostsIndex = () => {
     const isMounted = useRef(true);
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [query, setQuery] = useState({ page: 1, category_id: '' });
+    const [query, setQuery] = useState({
+        page: 1,
+        category_id: '',
+        order_column: 'id',
+        order_direction: 'desc',
+    });
 
     useEffect(() => {
         fetchPosts();
         fetchCategories();
-        console.log(posts);
     }, []);
 
     useEffect(() => {
@@ -64,6 +68,21 @@ const PostsIndex = () => {
             category_id: event.target.value
         });
     }, []);
+
+    const orderChanged = useCallback((col) => {
+        if (!col) return;
+        let dir = 'asc';
+        if (col === query.order_column) {
+            dir = query.order_direction === 'asc' ? 'desc' : 'asc'
+        }
+
+        setQuery(prev => ({
+            ...prev,
+            page: 1,
+            order_column: col,
+            order_direction: dir
+        }));
+    }, [query]);
 
     const renderPosts = useCallback(() => {
         return (
@@ -140,6 +159,16 @@ const PostsIndex = () => {
         );
     }, [categories]);
 
+    const orderColumnIcon = useCallback((col) => {
+        let icon = 'fa-sort';
+        if (query.order_column === col) {
+            icon = (query.order_direction === 'asc') ? 'fa-sort-up' : 'fa-sort-down'
+        }
+        return (
+            <i className={`fa-solid ${icon}`}></i>
+        );
+    }, [query]);
+
     // if (!posts.data) return;
     return (
         <div className="overflow-hidden overflow-x-auto p-6 bg-white border-gray-200">
@@ -152,19 +181,35 @@ const PostsIndex = () => {
                     <thead className="table-header">
                         <tr>
                             <th>
-                                <span>ID</span>
+                                <div>
+                                    <span>ID</span>
+                                    <button onClick={() => orderChanged('id')} type='button' className='column-soft'>
+                                        {orderColumnIcon('id')}
+                                    </button>
+                                </div>
                             </th>
                             <th>
-                                <span>Title</span>
+                                <div>
+                                    <span>Title</span>
+                                    <button onClick={() => orderChanged('title')} type='button' className='column-soft'>
+                                        {orderColumnIcon('title')}
+                                    </button>
+                                </div>
                             </th>
                             <th>
-                                <span>Category</span>
+                                <div>
+                                    <span>Category</span>
+                                </div>
                             </th>
                             <th>
-                                <span>Content</span>
+                                <div>
+                                    <span>Content</span>
+                                </div>
                             </th>
                             <th>
-                                <span>Created at</span>
+                                <div>
+                                    <span>Created at</span>
+                                </div>
                             </th>
                         </tr>
                     </thead>
