@@ -11,6 +11,7 @@ const PostsCreate = () => {
         category_id: '',
     });
     const [categories, setCategories] = useState([]);
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         fetchCategories();
@@ -51,9 +52,20 @@ const PostsCreate = () => {
                 navigate('/', { replace: true });
             }
         } catch (error) {
-            console.log(error);
+            setErrors(error.response.data.errors);
         }
     }, [post]);
+
+    const showError = useCallback((name) => {
+        if (!errors[name]) return;
+        return (
+            errors[name].map((msg, i) => {
+                return (
+                    <div key={i}>{msg}</div>
+                )
+            })
+        )
+    }, [errors]);
 
     return (
         <form onSubmit={handleSubmit}>
@@ -62,12 +74,18 @@ const PostsCreate = () => {
                     Title
                 </label>
                 <input value={post.title} onChange={handleChange} name="title" id="title" type="text" className="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                <div className="text-red-600 mt-1">
+                    {showError('title')}
+                </div>
             </div>
             <div className="mt-4">
                 <label htmlFor="content" className="block font-medium text-sm text-gray-700">
                     Content
                 </label>
                 <textarea value={post.content} onChange={handleChange} name="content" id="content" type="text" className="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+                <div className="text-red-600 mt-1">
+                    {showError('content')}
+                </div>
             </div>
             <div className="mt-4">
                 <label htmlFor="category" className="block font-medium text-sm text-gray-700">
@@ -79,6 +97,9 @@ const PostsCreate = () => {
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                     )}
                 </select>
+                <div className="text-red-600 mt-1">
+                    {showError('category_id')}
+                </div>
             </div>
             <div className="mt-4">
                 <button type="submit" className="px-3 py-2 bg-blue-600 text-white rounded">
