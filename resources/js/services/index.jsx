@@ -1,9 +1,9 @@
-import { get, post } from './ApiService';
+import { get, post, patch, destroy } from './ApiService';
 import { getCategories } from './CategoryService';
-import { getPosts, storePost } from './PostService';
+import { getPosts, getPost, storePost, updatePost, deletePost } from './PostService';
 
 export {
-    get, post, 
+    get, post, patch, destroy,
     getCategories,
-    getPosts, storePost
+    getPosts, getPost, storePost, updatePost, deletePost
 }

@@ -1,4 +1,4 @@
-import { post, get } from './';
+import { post, get, patch, destroy } from './';
 
 export const getPosts = async (payload) => {
     try {
@@ -9,12 +9,17 @@ export const getPosts = async (payload) => {
     }
 };
 
-export const storePost = async (params) => {
+export const getPost = async (id) => {
     try {
-        const payload = {
-            ...params,
-        };
+        const response = await get(`api/posts/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
 
+export const storePost = async (payload) => {
+    try {
         const response = await post(`api/posts`, payload);
         return response;
     } catch (error) {
@@ -22,27 +27,20 @@ export const storePost = async (params) => {
     }
 };
 
-// export const searchCompanies = async (filters: any, page: number = 1) => {
-//   try {
-//     let payload = {
-//       ...filters,
-//       page: page,
-//     };
-//     const response = await post('api/companies/search', payload);
-//     return response;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+export const updatePost = async (id, payload) => {
+    try {
+        const response = await patch(`api/posts/${id}`, payload);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
 
-// export const saveCompany = async (params: Object) => {
-//   try {
-//     const payload = {
-//       ...params,
-//     };
-//     const response = await post(`api/companies/store`, payload);
-//     return response;
-//   } catch (error) {
-//     throw error;
-//   }
-// };
+export const deletePost = async (id) => {
+    try {
+        const response = await destroy(`api/posts/${id}`);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

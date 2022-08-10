@@ -27,6 +27,14 @@ class StorePostRequest extends FormRequest
             'title' => 'required',
             'content' => 'required',
             'category_id' => 'required',
+            'thumbnail' => 'nullable|string'
+        ];
+    }
+
+    public function attributes()
+    {
+        return [
+            'category_id' => 'category field'
         ];
     }
 }

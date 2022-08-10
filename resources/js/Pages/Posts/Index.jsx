@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getPosts, getCategories } from '../../Services';
+import { Link } from 'react-router-dom';
+import { getPosts, getCategories, deletePost } from '../../Services';
+import Swal from 'sweetalert2';
 
 const PostsIndex = () => {
     const isMounted = useRef(true);
@@ -83,6 +85,42 @@ const PostsIndex = () => {
         }));
     }, [query]);
 
+    const handleDelete = useCallback(async (event) => {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Delete this post?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            confirmButtonColor: '#EF4444',
+            cancelButtonText: 'No',
+            cancelButtonColor: '#A3A3A3',
+            reverseButtons: true,
+            focusCancel: true
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    if (!isMounted.current) return;
+                    let res = await deletePost(event.target.value);
+                    if (res.status >= 200) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Successfully Deleted Post',
+                            text: 'message will close in 2 secs',
+                            timer: 2000
+                        });
+                        fetchPosts();
+                    }
+                } catch (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Something went wrong'
+                    });
+                }
+            }
+        })
+    }, []);
+
     const renderPosts = useCallback(() => {
         return (
             posts.data ?
@@ -94,6 +132,10 @@ const PostsIndex = () => {
                             <td>{post.category.name}</td>
                             <td>{post.content}</td>
                             <td>{post.created_at}</td>
+                            <td className='flex justify-between items-center'>
+                                <Link to={`posts/edit/${post.id}`}>Edit</Link>
+                                <button type="button" value={post.id} onClick={handleDelete} className="bg-red-500 rounded-full text-white mx-3 px-3 py-1 font-bold">Delete</button>
+                            </td>
                         </tr>
                     );
                 })
@@ -210,6 +252,7 @@ const PostsIndex = () => {
                                     <span>Created at</span>
                                 </div>
                             </th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody className="table-body">

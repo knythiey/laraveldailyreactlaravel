@@ -46,6 +46,11 @@ class PostController extends Controller
     {
         $post = Post::create($request->validated());
 
+        if ($request->hasFile('thumbnail')) {
+            $fileName = $request->file('thumbnail')->getClientOriginalName();
+            $post['thumbnail'] = 'https://' . $fileName . '.com';
+        }
+
         return new PostResource($post);
     }
 
@@ -55,9 +60,9 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Post $post)
     {
-        //
+        return new PostResource($post);
     }
 
     /**
@@ -67,9 +72,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StorePostRequest $request, Post $post)
     {
-        //
+        $post->update($request->validated());
+        return new PostResource($post);
     }
 
     /**
@@ -78,8 +84,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        //
+        $post->delete();
+
+        return response()->noContent();
     }
 }

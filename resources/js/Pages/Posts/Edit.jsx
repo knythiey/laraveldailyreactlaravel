@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { getCategories, storePost } from '../../Services';
-import { useNavigate } from 'react-router-dom';
+import { getCategories, getPost, updatePost } from '../../Services';
+import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-const PostsCreate = () => {
+const PostsEdit = () => {
     const isMounted = useRef(true);
-    let navigate = useNavigate();
+    let navigate = useNavigate(),
+        { id } = useParams();
     const [post, setPost] = useState({
+        id: '',
         title: '',
         content: '',
         category_id: '',
@@ -17,6 +19,7 @@ const PostsCreate = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        fetchPost();
         fetchCategories();
     }, []);
 
@@ -24,6 +27,21 @@ const PostsCreate = () => {
         return () => {
             isMounted.current = false;
         };
+    }, []);
+
+    const fetchPost = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            if (!isMounted.current) return;
+            let res = await getPost(id);
+            if (res.data.data) {
+                setPost(res.data.data);
+            }
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
     const fetchCategories = useCallback(async () => {
@@ -46,8 +64,6 @@ const PostsCreate = () => {
             ...prev,
             [name]: val
         }));
-
-
     }, []);
 
     const handleSubmit = useCallback(async (event) => {
@@ -55,31 +71,26 @@ const PostsCreate = () => {
         if (isLoading) return;
 
         setErrors({});
-        // setIsLoading(true);
-
-        let postData = new FormData();
-
-        Object.entries(post).forEach(v => {
-            postData.append(v[0], v[1] ?? '');
-        });
+        setIsLoading(true);
 
         try {
             if (!isMounted.current) return;
-            let res = await storePost(postData);
-            console.log(res);
+            let res = await updatePost(id, post);
             if (res.status >= 200) {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Post Added Successfully'
+                    title: 'Successfully edited Post',
+                    text: 'message will close in 2 secs',
+                    timer: 2000
                 });
-                navigate('/', { replace: true });
+                setPost(res.data.data);
             }
-        } catch (error) {
+        } catch (err) {
             Swal.fire({
                 icon: 'error',
-                title: error.response.data.message
+                title: err.response.data.message
             });
-            setErrors(error.response.data.errors);
+            setErrors(err.response.data.errors);
         } finally {
             setIsLoading(false);
         }
@@ -127,13 +138,6 @@ const PostsCreate = () => {
                 {errMsg('category_id')}
             </div>
             <div className="mt-4">
-                <label htmlFor="thumbnail" className="block font-medium text-sm text-gray-700">
-                    Thumbnail
-                </label>
-                <input type="file" name='thumbnail' id='thumbnail' onChange={handleChange} />
-                {errMsg('thumbnail')}
-            </div>
-            <div className="mt-4">
                 <button type="submit" className="flex items-center px-3 py-2 bg-blue-600 text-white rounded" disabled={isLoading}>
                     <svg role="status" className={`w-4 h-4 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 inline ${!isLoading ? 'hidden' : ''}`} viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
@@ -146,4 +150,4 @@ const PostsCreate = () => {
     )
 }
 
-export default PostsCreate
+export default PostsEdit

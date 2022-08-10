@@ -41,8 +41,8 @@ export const get = async (url, data) => {
 export const post = async (url, data) => {
   try {
     // let access_token = localStorage.getItem(is_company ? COMPANY_REGISTRATION_TOKEN : ACCESS_TOKEN);
-    let access_token = false;
-    let headers = {};
+    let access_token = false,
+      headers = {};
     if (access_token) {
       headers["Authorization"] = `Bearer ${access_token}`;
     }
@@ -58,6 +58,53 @@ export const post = async (url, data) => {
 
   } catch (err) {
     console.log(err);
+    return Promise.reject(err);
+  }
+}
+
+export const patch = async (url, data) => {
+  try {
+    // let access_token = localStorage.getItem(is_company ? COMPANY_REGISTRATION_TOKEN : ACCESS_TOKEN);
+    let access_token = false,
+      headers = {};
+    if (access_token) {
+      headers["Authorization"] = `Bearer ${access_token}`;
+    }
+
+    let response = await axiosInstance({
+      'method': 'PATCH',
+      'url': url,
+      'headers': headers,
+      'data': data
+    });
+
+    return Promise.resolve(response);
+
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
+export const destroy = async (url, data) => {
+  try {
+    // let access_token = localStorage.getItem(ACCESS_TOKEN);
+    let access_token = false,
+      headers = {};
+
+    if (access_token) {
+      headers["Authorization"] = "Bearer " + access_token;
+    }
+
+    let response = await axiosInstance({
+      'method': 'DELETE',
+      'url': url,
+      'headers': headers,
+      'data': data
+    });
+
+    return Promise.resolve(response);
+
+  } catch (err) {
     return Promise.reject(err);
   }
 }
