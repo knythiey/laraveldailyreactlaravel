@@ -8,6 +8,7 @@ import PostsEdit from './Pages/Posts/Edit';
 import App from './Layouts/App';
 import Guest from './Layouts/Guest';
 import Login from './Pages/Auth/Login';
+import Register from './Pages/Auth/Register';
 
 ReactDOM.createRoot(document.getElementById('app')).render(
     <BrowserRouter>
@@ -19,6 +20,9 @@ ReactDOM.createRoot(document.getElementById('app')).render(
             </Route>
             <Route path="login" element={<Guest />}>
                 <Route index element={<Login />}></Route>
+            </Route>
+            <Route path="register" element={<Guest />}>
+                <Route index element={<Register />}></Route>
             </Route>
             <Route path="*" element={<Navigate to="/posts" replace />} />
         </Routes>

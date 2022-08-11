@@ -1,13 +1,15 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../../Services';
+import { useNavigate } from 'react-router-dom';
+import { register } from '../../Services';
 
-const Login = () => {
+const Register = () => {
     const isMounted = useRef(true);
     let navigate = useNavigate();
-    const [creds, setCreds] = useState({
+    const [data, setData] = useState({
         email: '',
-        password: ''
+        name: '',
+        password: '',
+        password_confirmation: '',
     });
     const [errors, setErrors] = useState({});
 
@@ -21,7 +23,7 @@ const Login = () => {
         event.preventDefault();
         try {
             if (!isMounted.current) return;
-            let res = await login(creds);
+            let res = await register(data);
             if (res.data) {
                 setErrors({});
                 navigate('/posts');
@@ -29,7 +31,14 @@ const Login = () => {
         } catch (err) {
             setErrors(Object.entries(err.response.data.errors));
         }
-    }, [creds, errors])
+    }, [data, errors])
+
+    const handleChange = useCallback((event) => {
+        setData(prev => ({
+            ...prev,
+            [event.target.name]: event.target.value
+        }));
+    }, [data]);
 
     return (
         <div>
@@ -49,6 +58,22 @@ const Login = () => {
 
             <form onSubmit={handleSubmit}>
                 <div>
+                    <label htmlFor="name" className="block font-medium text-sm text-gray-700">
+                        Name
+                    </label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={data.name}
+                        onChange={handleChange}
+                        className="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        required
+                        autoFocus
+                    />
+                </div>
+
+                <div className="mt-4">
                     <label htmlFor="email" className="block font-medium text-sm text-gray-700">
                         Email
                     </label>
@@ -56,11 +81,10 @@ const Login = () => {
                         type="email"
                         id="email"
                         name="email"
-                        value={creds.email}
-                        onChange={(e) => { setCreds(prev => ({ ...prev, email: e.target.value })) }}
+                        value={data.email}
+                        onChange={handleChange}
                         className="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         required
-                        autoFocus
                     />
                 </div>
 
@@ -73,8 +97,23 @@ const Login = () => {
                         type="password"
                         id="password"
                         name="password"
-                        value={creds.password}
-                        onChange={(e) => { setCreds(prev => ({ ...prev, password: e.target.value })) }}
+                        value={data.password}
+                        onChange={handleChange}
+                        className="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                        required
+                    />
+                </div>
+
+                <div className="mt-4">
+                    <label htmlFor="password_confirmation" className="block font-medium text-sm text-gray-700">
+                        Confirm Password
+                    </label>
+                    <input
+                        type="password"
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        value={data.password_confirmation}
+                        onChange={handleChange}
                         className="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                         required
                     />
@@ -82,19 +121,12 @@ const Login = () => {
 
                 <div className="flex items-center justify-end mt-4">
                     <button type="submit" className="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150 ml-3">
-                        Log in
+                        Register
                     </button>
-                </div>
-
-                <div className="mt-4">
-                    Don't have an account?
-                    <Link to="/register" className="text-blue-600 ml-1">
-                        Create an account
-                    </Link>
                 </div>
             </form>
         </div>
     )
 }
 
-export default Login
+export default Register

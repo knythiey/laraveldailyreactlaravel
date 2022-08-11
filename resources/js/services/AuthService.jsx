@@ -26,3 +26,12 @@ export const isLoggedIn = async () => {
         throw error;
     }
 }
+
+export const register = async (payload) => {
+    try {
+        const response = await post('/register', payload);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}

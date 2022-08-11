@@ -46,8 +46,6 @@ const PostsCreate = () => {
             ...prev,
             [name]: val
         }));
-
-
     }, []);
 
     const handleSubmit = useCallback(async (event) => {
