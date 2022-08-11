@@ -15,5 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'layouts.app');
 
+Route::post('login', [LoginController::class, 'store']);
+Route::post('logout', [LoginController::class, 'destroy']);
+
 // FIX for SPA external URL should now still work
 Route::view('/{any?}', 'layouts.app')->where('any', '.*');
