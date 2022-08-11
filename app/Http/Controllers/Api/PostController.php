@@ -27,7 +27,23 @@ class PostController extends Controller
         if (!in_array($orderDir, ['asc', 'desc']))
             $orderDir = 'desc';
 
+        $filterables = ['id', 'title', 'content'];
+        $filterableValues = array_filter($request->only($filterables));
+
         $posts = Post::with('category')
+            ->when(count($filterableValues) > 0, function ($query) use ($filterableValues) {
+                foreach ($filterableValues as $col => $val) {
+                    $query->where($col, 'like', '%' . $val . '%');
+                }
+            })
+            ->when($request->filled('global'), function ($query) use ($filterables, $request) {
+                foreach ($filterables as $col) {
+                    if ($col == $filterables[0])
+                        $query->where($col, 'like', '%' . $request->global . '%');
+                    else
+                        $query->orWhere($col, 'like', '%' . $request->global . '%');
+                }
+            })
             ->when($request->filled('category_id'), function ($query) use ($request) {
                 $query->where('category_id', intval($request->category_id));
             })

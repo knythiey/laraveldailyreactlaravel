@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getPosts, getCategories, deletePost } from '../../Services';
 import Swal from 'sweetalert2';
+import { useDebounce } from '../../Hooks';
 
 const PostsIndex = () => {
     const isMounted = useRef(true);
@@ -9,13 +10,17 @@ const PostsIndex = () => {
     const [categories, setCategories] = useState([]);
     const [query, setQuery] = useState({
         page: 1,
+        id: '',
+        title: '',
         category_id: '',
+        content: '',
         order_column: 'id',
         order_direction: 'desc',
+        global: ''
     });
+    const debouncedState = useDebounce(query, 500);
 
     useEffect(() => {
-        fetchPosts();
         fetchCategories();
     }, []);
 
@@ -26,20 +31,21 @@ const PostsIndex = () => {
     }, []);
 
     useEffect(() => {
-        fetchPosts();
-    }, [query])
+        if (debouncedState) fetchPosts(debouncedState);
+    }, [debouncedState]);
 
-    const fetchPosts = useCallback(async () => {
+
+    const fetchPosts = useCallback(async (q) => {
         try {
             if (!isMounted.current) return;
-            let res = await getPosts(query);
+            let res = await getPosts(q);
             if (res.data) {
                 setPosts(res.data);
             }
         } catch (err) {
             console.log(err);
         }
-    });
+    }, [query]);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -61,14 +67,14 @@ const PostsIndex = () => {
         }));
     }, []);
 
-    const categoryChanged = useCallback((event) => {
+    const handleFilter = useCallback((event) => {
         if (!event) return;
-
-        setQuery({
+        setQuery(prev => ({
+            ...prev,
             page: 1,
-            category_id: event.target.value
-        });
-    }, []);
+            [event.target.name]: event.target.value
+        }));
+    }, [query]);
 
     const orderChanged = useCallback((col) => {
         if (!col) return;
@@ -121,7 +127,7 @@ const PostsIndex = () => {
         })
     }, []);
 
-    const renderPosts = useCallback(() => {
+    const renderPosts = useMemo(() => {
         return (
             posts.data ?
                 posts.data.map(post => {
@@ -139,12 +145,12 @@ const PostsIndex = () => {
                         </tr>
                     );
                 })
-                : (<tr key={`post-0`}><td className='text-center' rowSpan={4}>No Posts</td></tr>)
+                : (<tr><td className="text-center" rowSpan={6}>No Posts</td></tr>)
         )
     }, [posts])
 
-    const renderPaginatorLinks = useCallback(() => {
-        return posts.meta.links.map((link, index) =>
+    const renderPaginatorLinks = useMemo(() => {
+        return (posts?.meta?.links?.map((link, index) =>
             <button
                 key={index}
                 onClick={() => pageChanged(link.url)}
@@ -152,10 +158,10 @@ const PostsIndex = () => {
                 disabled={link.active || !link.url}
                 className="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 leading-5 hover:text-gray-500 focus:z-10 focus:outline-none focus:ring ring-gray-300 focus:border-blue-300 active:bg-gray-100 active:text-gray-700 transition ease-in-out duration-150 first:rounded-l-md last:rounded-r-md"
             />
-        );
+        ));
     }, [posts]);
 
-    const renderPaginator = useCallback(() => {
+    const renderPaginator = useMemo(() => {
         if (!posts.meta) return;
         else
             return (
@@ -177,7 +183,7 @@ const PostsIndex = () => {
 
                         <div>
                             <span className="relative z-0 inline-flex shadow-sm rounded-md">
-                                {renderPaginatorLinks()}
+                                {renderPaginatorLinks}
                             </span>
                         </div>
                     </div>
@@ -185,7 +191,7 @@ const PostsIndex = () => {
             );
     }, [posts]);
 
-    const renderCategoryFilter = useCallback(() => {
+    const renderCategoryFilter = useMemo(() => {
         if (!categories) return;
 
         const catEle = categories.map(cat =>
@@ -193,10 +199,13 @@ const PostsIndex = () => {
         );
 
         return (
-            <select onChange={categoryChanged} className="mt-1 sm:mt-0 sm:w-1/4 rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                <option value=''>-- all categories --</option>
-                {catEle}
-            </select>
+            <div className="m-2">
+                <select name="category_id" onChange={handleFilter} className="mt-1 block w-full sm:mt-0 rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <option value=''>-- all categories --</option>
+                    {catEle}
+                </select>
+            </div>
+
         );
     }, [categories]);
 
@@ -210,14 +219,44 @@ const PostsIndex = () => {
         );
     }, [query]);
 
+    const renderTextInputFilter = useCallback((column) => {
+        return (
+            <div className="m-2">
+                <input type="text" placeholder={`Search ${column}. . .`} onChange={handleFilter} name={column} value={query[column]} className="block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" />
+            </div>
+        )
+    }, [query]);
+
+    const renderFiltersRow = useMemo(() => {
+        return (
+            <tr className="bg-gray-50">
+                <th>
+                    {renderTextInputFilter('id')}
+                </th>
+                <th>
+                    {renderTextInputFilter('title')}
+                </th>
+                <th>
+                    {renderCategoryFilter}
+                </th>
+                <th>
+                    {renderTextInputFilter('content')}
+                </th>
+                <th>
+                    {renderTextInputFilter('created_at')}
+                </th>
+                <th></th>
+            </tr>
+        )
+    }, [categories, query]);
+
     // if (!posts.data) return;
     return (
         <div className="overflow-hidden overflow-x-auto p-6 bg-white border-gray-200">
             <div className="min-w-full align-middle">
                 <div className="mb-4">
-                    {renderCategoryFilter()}
+                    {renderTextInputFilter('global')}
                 </div>
-
                 <table className="table">
                     <thead className="table-header">
                         <tr>
@@ -254,13 +293,15 @@ const PostsIndex = () => {
                             </th>
                             <th></th>
                         </tr>
+
+                        {renderFiltersRow}
                     </thead>
                     <tbody className="table-body">
-                        {renderPosts()}
+                        {renderPosts}
                     </tbody>
                 </table>
                 <div className="mt-4">
-                    {renderPaginator()}
+                    {renderPaginator}
                 </div>
             </div>
         </div>
