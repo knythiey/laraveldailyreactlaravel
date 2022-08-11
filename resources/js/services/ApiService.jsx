@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Accept'
   },
-  // withCredentials: true
+  withCredentials: true
 });
 
 export const get = async (url, data) => {
